@@ -1,0 +1,15 @@
+extends layout
+
+block content
+  h1 Welcome to Express Auth
+  p This is a demo application showing JWT authentication, cookies, and theme switching.
+  
+  if !user
+    p Please login or register to access the dashboard.
+  else
+    p Welcome back, #{user.username}!
+    
+  .theme-switcher
+    h2 Theme Settings
+    button(onclick="setTheme('light-theme')") Light Theme
+    button(onclick="setTheme('dark-theme')") Dark Theme 

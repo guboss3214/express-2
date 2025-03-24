@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Views Directory</title>
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 20px;
+        }
+        .view-list {
+            list-style: none;
+            padding: 0;
+        }
+        .view-item {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .view-item:last-child {
+            border-bottom: none;
+        }
+        .view-link {
+            color: #007bff;
+            text-decoration: none;
+        }
+        .view-link:hover {
+            text-decoration: underline;
+        }
+        .view-type {
+            color: #666;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Available Views</h1>
+        <ul class="view-list">
+            <li class="view-item">
+                <a href="/" class="view-link">Home Page</a>
+                <span class="view-type">(PUG)</span>
+            </li>
+            <li class="view-item">
+                <a href="/login" class="view-link">Login Page</a>
+                <span class="view-type">(PUG)</span>
+            </li>
+            <li class="view-item">
+                <a href="/register" class="view-link">Registration Page</a>
+                <span class="view-type">(PUG)</span>
+            </li>
+            <li class="view-item">
+                <a href="/dashboard" class="view-link">Dashboard</a>
+                <span class="view-type">(PUG) - Protected Route</span>
+            </li>
+        </ul>
+    </div>
+</body>
+</html> 
