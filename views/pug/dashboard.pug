@@ -2,7 +2,7 @@ extends layout
 
 block content
   h1 Dashboard
-  p Welcome to your dashboard, #{user.username}!
+  p Welcome to your dashboard, #{user.email}!
   
   .theme-switcher
     h2 Theme Settings
@@ -11,5 +11,5 @@ block content
     
   .user-info
     h2 Your Information
-    p Username: #{user.username}
+    p email: #{user.email}
     p You are logged in with JWT authentication 

@@ -1,81 +1,82 @@
 # Express Authentication Project
 
-This project demonstrates the implementation of various Express.js features including:
-- JWT Authentication
-- Cookie Management
-- Theme Switching with Cookie Storage
-- Static File Serving
-- PUG Template Engine
-- Protected Routes
+Цей проект демонструє реалізацію різних функцій Express.js, включаючи:
 
-## Features
+- Аутентифікація з використанням JWT
+- Керування cookies
+- Перемикання теми з збереженням в cookie
+- Обслуговування статичних файлів
+- Використання шаблонізатора PUG
+- Захищені маршрути
 
-- User registration and login with JWT
-- Protected dashboard route
-- Theme switching (light/dark) with cookie persistence
-- Favicon support
-- Responsive design
+## Особливості
 
-## Prerequisites
+- Реєстрація користувача та вхід з використанням JWT
+- Захищений маршрут для панелі керування
+- Перемикання теми (світла/темна) з збереженням у cookie
+- Підтримка favicon
+- Адаптивний дизайн
 
-- Node.js (v14 or higher)
-- npm (v6 or higher)
+## Пререквізити
 
-## Installation
+- Node.js (версія 14 або вище)
+- npm (версія 6 або вище)
 
-1. Clone the repository:
+## Інсталяція
+
+1. Клонування репозиторію:
 ```bash
 git clone <your-repository-url>
 cd express-auth-project
 ```
 
-2. Install dependencies:
+2. Встановлення залежностей:
 ```bash
 npm install
 ```
 
-3. Create a `.env` file in the root directory with the following content:
+3. Створіть файл `.env` у кореневій директорії з наступним вмістом:
 ```
 PORT=3000
 JWT_SECRET=your-super-secret-key-change-this-in-production
 ```
 
-4. Add a favicon.ico file to the `public` directory
+4. Додайте файл `favicon.ico` в директорію `public`
 
-## Running the Application
+## Запуск додатку
 
-Development mode:
+Режим розробки:
 ```bash
 npm run dev
 ```
 
-Production mode:
+Режим продакшн:
 ```bash
 npm start
 ```
 
-The application will be available at `http://localhost:3000`
+Додаток буде доступний за адресою `http://localhost:3000`
 
-## Available Routes
+## Доступні маршрути
 
-- `GET /` - Home page
-- `GET /login` - Login page
-- `POST /login` - Login form submission
-- `GET /register` - Registration page
-- `POST /register` - Registration form submission
-- `GET /dashboard` - Protected dashboard page (requires authentication)
-- `POST /theme` - Theme preference update
+- `GET /` - Головна сторінка
+- `GET /login` - Сторінка входу
+- `POST /login` - Надсилання форми входу
+- `GET /register` - Сторінка реєстрації
+- `POST /register` - Надсилання форми реєстрації
+- `GET /dashboard` - Захищена сторінка панелі керування (вимагає аутентифікації)
+- `POST /theme` - Оновлення налаштувань теми
 
-## Security Features
+## Безпека
 
-- JWT tokens stored in httpOnly cookies
-- Protected routes using middleware
-- Secure password handling (in a real application)
+- JWT токени зберігаються в httpOnly cookie
+- Захищені маршрути за допомогою middleware
+- Надійне оброблення паролів (для реальних застосунків)
 
-## Technologies Used
+## Використані технології
 
 - Express.js
-- JWT for authentication
-- Cookie-parser for cookie management
-- PUG template engine
-- Node.js 
+- JWT для аутентифікації
+- Cookie-parser для управління cookies
+- PUG шаблонізатор
+- Node.js
