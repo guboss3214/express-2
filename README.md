@@ -38,7 +38,7 @@ npm install
 3. Створіть файл `.env` у кореневій директорії з наступним вмістом:
 ```
 PORT=3000
-JWT_SECRET=your-super-secret-key-change-this-in-production
+SESSION_SECRET=your-super-secret-key
 ```
 
 4. Додайте файл `favicon.ico` в директорію `public`
