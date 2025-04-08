@@ -1,0 +1,19 @@
+extends layout
+
+block content
+  h1 Info
+    if messages && messages.length > 0
+      each message in messages
+        div(style='color: red') #{message}
+
+    .user-info
+    h2 User info from DB
+    if info 
+      p Users Account: #{info.length}
+      each user in info 
+        p(style='color: green') #{user.email} - #{user.name} - #{user.age}
+    else 
+      p No users found in the database.
+    p You are logged in with JWT authentication 
+
+

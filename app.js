@@ -7,11 +7,15 @@ const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const flash = require('connect-flash');
+const connectDB = require('./db/connectDB');
+const jwt = require('jsonwebtoken');
+const infoRoute = require('./routes/getInfoRoute');
 
 const users = [];
 
 const app = express();
 const PORT = process.env.PORT || 3000;
+connectDB();
 
 passport.use(new LocalStrategy(
   { usernameField: 'email' },
@@ -41,6 +45,8 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
+
+
 app.use(session({
   secret: process.env.SESSION_SECRET || 'default_secret', 
   resave: false,
@@ -63,12 +69,28 @@ const authenticateToken = (req, res, next) => {
   if (req.isAuthenticated()) {
     return next();
   }
-  res.redirect('/login');
+
+  const token = req.cookies.token;
+
+  if (!token) {
+    return res.redirect('/login');
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.SESSION_SECRET);
+    req.user = decoded;
+    return next();
+  } catch (err) {
+    console.error('Invalid JWT:', err.message);
+    return res.redirect('/login');
+  }
 };
 
 
-app.get('/', authenticateToken, (req, res) => {
-  res.render('index', { title: 'Home' });
+app.use('/getInfo', authenticateToken, infoRoute);
+
+app.get('/', (req, res) => {
+  res.render('index', { title: 'Home', user: req.user });
 });
 
 app.get('/views', (req, res) => {
@@ -91,6 +113,16 @@ app.post('/register', async (req, res) => {
   res.redirect('/login');
 });
 
+app.post('/theme', (req, res) => {
+
+  const { theme } = req.body;
+
+  res.cookie('theme', theme, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+
+  res.status(200).send();
+
+});
+
 app.get('/login', (req, res) => {
   res.render('login', {
     title: 'Login',
@@ -99,11 +131,30 @@ app.get('/login', (req, res) => {
   });
 });
 
-app.post('/login', passport.authenticate('local', {
-  successRedirect: '/dashboard',
-  failureRedirect: '/login',
-  failureFlash: true 
-}));
+app.post('/login', (req, res, next) => {
+  passport.authenticate('local', (err, user, info) => {
+    if (err) return next(err);
+    if (!user) {
+      req.flash('error', info.message);
+      return res.redirect('/login');
+    }
+
+    req.login(user, (err) => {
+      if (err) return next(err);
+
+      // 🔥 JWT токен
+      const token = jwt.sign(
+        { email: user.email },
+        process.env.SESSION_SECRET,
+        { expiresIn: '1h' }
+      );
+
+      res.cookie('token', token, { httpOnly: true });
+
+      return res.redirect('/dashboard');
+    });
+  })(req, res, next);
+});
 
 app.get('/logout', (req, res) => {
   req.logout((err) => {

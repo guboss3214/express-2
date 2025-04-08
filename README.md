@@ -39,9 +39,14 @@ npm install
 ```
 PORT=3000
 SESSION_SECRET=your-super-secret-key
+DB_PASS=your-database-password
+DB_URL=mongodb+srv://<db_username>:<db_password>@cluster0.o3hw0be.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0
 ```
 
 4. Додайте файл `favicon.ico` в директорію `public`
+
+5. Особливі файли:
+  - 'addUser.js' - файл для додавання користувача в базу даних ```node addUser.js <name> <email> <age>```
 
 ## Запуск додатку
 
@@ -60,12 +65,15 @@ npm start
 ## Доступні маршрути
 
 - `GET /` - Головна сторінка
+- `GET /views` - Сторінка з використанням шаблонізатора EJS
+- `GET /protected` - Захищений маршрут
+- `GET /getInfo` - Сторінка де ви можете подивитися інформацію про користувача з бази даних
 - `GET /login` - Сторінка входу
 - `POST /login` - Надсилання форми входу
 - `GET /register` - Сторінка реєстрації
 - `POST /register` - Надсилання форми реєстрації
+- `POST /theme` - Перемикання теми (світла/темна) з збереженням у cookie
 - `GET /dashboard` - Захищена сторінка панелі керування (вимагає аутентифікації)
-- `POST /theme` - Оновлення налаштувань теми
 
 ## Безпека
 
@@ -77,6 +85,8 @@ npm start
 
 - Express.js
 - JWT для аутентифікації
+- MongoDB для зберігання даних
+- Mongoose для роботи з MongoDB
 - Cookie-parser для управління cookies
 - PUG шаблонізатор
 - Node.js
