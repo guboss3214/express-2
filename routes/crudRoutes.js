@@ -84,13 +84,31 @@ router.delete('/deleteMany', async (req, res) => {
 router.get('/find', async (req, res) => {
   try {
     const collection = getCollection(req);
-    const { filter = {}, projection = {} } = req.query;
 
-    const parsedFilter = filter ? JSON.parse(filter) : {};
-    const parsedProjection = projection ? JSON.parse(projection) : {};
+    let filter = {};
+    let projection = {};
 
-    const data = await collection.find(parsedFilter).project(parsedProjection).toArray();
+    if (req.query.filter) {
+      try {
+        filter = JSON.parse(req.query.filter);
+      } catch (e) {
+        console.error('Invalid filter JSON');
+        return res.status(400).json({ message: 'Invalid filter JSON' });
+      }
+    }
+
+    if (req.query.projection) {
+      try {
+        projection = JSON.parse(req.query.projection);
+      } catch (e) {
+        console.error('Invalid projection JSON');
+        return res.status(400).json({ message: 'Invalid projection JSON' });
+      }
+    }
+
+    const data = await collection.find(filter).project(projection).toArray();
     res.json(data);
+
   } catch (error) {
     console.error("Error in find:", error);
     res.status(500).json({ message: error.message });
