@@ -10,168 +10,159 @@ const flash = require('connect-flash');
 const connectDB = require('./db/connectDB');
 const jwt = require('jsonwebtoken');
 const infoRoute = require('./routes/getInfoRoute');
+const { MongoClient } = require('mongodb');
+const crudRoutes = require('./routes/crudRoutes');
 
 const users = [];
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-connectDB();
 
-passport.use(new LocalStrategy(
-  { usernameField: 'email' },
-  (email, password, done) => {
-    const user = users.find(u => u.email === email);
-    if (!user) return done(null, false, { message: 'User not found' });
-
-    bcrypt.compare(password, user.password, (err, isMatch) => {
-      if (err) return done(err);
-      if (!isMatch) return done(null, false, { message: 'Invalid password' });
-
-      return done(null, user);
-    });
-  }
-));
-
-passport.serializeUser((user, done) => {
-  done(null, user.email);
-});
-
-passport.deserializeUser((email, done) => {
-  const user = users.find(u => u.email === email);
-  done(null, user);
-});
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
-app.use(cookieParser());
-
-
-
-app.use(session({
-  secret: process.env.SESSION_SECRET || 'default_secret', 
-  resave: false,
-  saveUninitialized: false,
-  cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 60 * 60 * 1000 } 
-}));
-
-app.use(flash());
-app.use(passport.initialize());
-app.use(passport.session());
-
-app.set('view engine', 'pug');
-app.set('views', path.join(__dirname, 'views/pug'));
-
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.use('/favicon.ico', express.static(path.join(__dirname, 'public/favicon.ico')));
-
-const authenticateToken = (req, res, next) => {
-  if (req.isAuthenticated()) {
-    return next();
-  }
-
-  const token = req.cookies.token;
-
-  if (!token) {
-    return res.redirect('/login');
-  }
-
+async function startServer() {
   try {
-    const decoded = jwt.verify(token, process.env.SESSION_SECRET);
-    req.user = decoded;
-    return next();
-  } catch (err) {
-    console.error('Invalid JWT:', err.message);
-    return res.redirect('/login');
-  }
-};
+    const client = await connectDB();
+    app.locals.db = client.db(process.env.DB_NAME);
 
+    passport.use(new LocalStrategy(
+      { usernameField: 'email' },
+      (email, password, done) => {
+        const user = users.find(u => u.email === email);
+        if (!user) return done(null, false, { message: 'User not found' });
 
-app.use('/getInfo', authenticateToken, infoRoute);
+        bcrypt.compare(password, user.password, (err, isMatch) => {
+          if (err) return done(err);
+          if (!isMatch) return done(null, false, { message: 'Invalid password' });
+          return done(null, user);
+        });
+      }
+    ));
 
-app.get('/', (req, res) => {
-  res.render('index', { title: 'Home', user: req.user });
-});
-
-app.get('/views', (req, res) => {
-  res.sendFile(path.join(__dirname, 'views', 'index.ejs'));
-});
-
-
-app.get('/register', (req, res) => {
-  res.render('register', { title: 'Register' });
-});
-
-app.post('/register', async (req, res) => {
-  const { email, password } = req.body;
-
-  const hashedPassword = await bcrypt.hash(password, 10);
-
-  users.push({ email, password: hashedPassword });
-
-  req.flash('success', 'Registration successful. Please log in.');
-  res.redirect('/login');
-});
-
-app.post('/theme', (req, res) => {
-
-  const { theme } = req.body;
-
-  res.cookie('theme', theme, { maxAge: 365 * 24 * 60 * 60 * 1000 });
-
-  res.status(200).send();
-
-});
-
-app.get('/login', (req, res) => {
-  res.render('login', {
-    title: 'Login',
-    messages: req.flash('error'),
-    successMessages: req.flash('success') 
-  });
-});
-
-app.post('/login', (req, res, next) => {
-  passport.authenticate('local', (err, user, info) => {
-    if (err) return next(err);
-    if (!user) {
-      req.flash('error', info.message);
-      return res.redirect('/login');
-    }
-
-    req.login(user, (err) => {
-      if (err) return next(err);
-
-      // 🔥 JWT токен
-      const token = jwt.sign(
-        { email: user.email },
-        process.env.SESSION_SECRET,
-        { expiresIn: '1h' }
-      );
-
-      res.cookie('token', token, { httpOnly: true });
-
-      return res.redirect('/dashboard');
+    passport.serializeUser((user, done) => {
+      done(null, user.email);
     });
-  })(req, res, next);
-});
 
-app.get('/logout', (req, res) => {
-  req.logout((err) => {
-    if (err) return next(err);
-    res.redirect('/');
-  });
-});
+    passport.deserializeUser((email, done) => {
+      const user = users.find(u => u.email === email);
+      done(null, user);
+    });
 
+    app.use(express.json());
+    app.use(express.urlencoded({ extended: true }));
+    app.use(cookieParser());
+    app.use(session({
+      secret: process.env.SESSION_SECRET || 'default_secret', 
+      resave: false,
+      saveUninitialized: false,
+      cookie: { httpOnly: true, secure: process.env.NODE_ENV === 'production', maxAge: 60 * 60 * 1000 }
+    }));
 
-app.get('/dashboard', authenticateToken, (req, res) => {
-  res.render('dashboard', { title: 'Dashboard', user: req.user });
-});
+    app.use(flash());
+    app.use(passport.initialize());
+    app.use(passport.session());
 
-app.get('/protected', authenticateToken, (req, res) => {
-  res.send('This is a protected route');
-});
+    app.set('view engine', 'pug');
+    app.set('views', path.join(__dirname, 'views/pug'));
+    app.use(express.static(path.join(__dirname, 'public')));
+    app.use('/favicon.ico', express.static(path.join(__dirname, 'public/favicon.ico')));
 
-app.listen(PORT, () => {
-  console.log(`Server is running on port ${PORT}`);
-});
+    const authenticateToken = (req, res, next) => {
+      if (req.isAuthenticated()) {
+        return next();
+      }
+
+      const token = req.cookies.token;
+      if (!token) {
+        return res.redirect('/login');
+      }
+
+      try {
+        const decoded = jwt.verify(token, process.env.SESSION_SECRET);
+        req.user = decoded;
+        return next();
+      } catch (err) {
+        console.error('Invalid JWT:', err.message);
+        return res.redirect('/login');
+      }
+    };
+
+    app.use('/getInfo', authenticateToken, infoRoute);
+    app.use('/api', authenticateToken, crudRoutes);
+
+    app.get('/', (req, res) => {
+      res.render('index', { title: 'Home', user: req.user });
+    });
+
+    app.get('/views', (req, res) => {
+      res.sendFile(path.join(__dirname, 'views', 'index.ejs'));
+    });
+
+    app.get('/register', (req, res) => {
+      res.render('register', { title: 'Register' });
+    });
+
+    app.post('/register', async (req, res) => {
+      const { email, password } = req.body;
+      const hashedPassword = await bcrypt.hash(password, 10);
+      users.push({ email, password: hashedPassword });
+
+      req.flash('success', 'Registration successful. Please log in.');
+      res.redirect('/login');
+    });
+
+    app.post('/theme', (req, res) => {
+      const { theme } = req.body;
+      res.cookie('theme', theme, { maxAge: 365 * 24 * 60 * 60 * 1000 });
+      res.status(200).send();
+    });
+
+    app.get('/login', (req, res) => {
+      res.render('login', {
+        title: 'Login',
+        messages: req.flash('error'),
+        successMessages: req.flash('success')
+      });
+    });
+
+    app.post('/login', (req, res, next) => {
+      passport.authenticate('local', (err, user, info) => {
+        if (err) return next(err);
+        if (!user) {
+          req.flash('error', info.message);
+          return res.redirect('/login');
+        }
+
+        req.login(user, (err) => {
+          if (err) return next(err);
+          const token = jwt.sign({ email: user.email }, process.env.SESSION_SECRET, { expiresIn: '1h' });
+          res.cookie('token', token, { httpOnly: true });
+          return res.redirect('/dashboard');
+        });
+      })(req, res, next);
+    });
+
+    app.get('/logout', (req, res) => {
+      req.logout((err) => {
+        if (err) return next(err);
+        res.redirect('/');
+      });
+    });
+
+    app.get('/dashboard', authenticateToken, (req, res) => {
+      res.render('dashboard', { title: 'Dashboard', user: req.user });
+    });
+
+    app.get('/protected', authenticateToken, (req, res) => {
+      res.send('This is a protected route');
+    });
+
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
+    });
+
+  } catch (error) {
+    console.error('Failed to connect to DB:', error);
+    process.exit(1);
+  }
+}
+
+startServer();
