@@ -12,6 +12,8 @@ const jwt = require('jsonwebtoken');
 const infoRoute = require('./routes/getInfoRoute');
 const { MongoClient } = require('mongodb');
 const crudRoutes = require('./routes/crudRoutes');
+const dataRoutes = require('./routes/dataRoutes');
+
 
 const users = [];
 
@@ -87,6 +89,7 @@ async function startServer() {
 
     app.use('/getInfo', authenticateToken, infoRoute);
     app.use('/api', authenticateToken, crudRoutes);
+    app.use('/data', authenticateToken, dataRoutes);
 
     app.get('/', (req, res) => {
       res.render('index', { title: 'Home', user: req.user });

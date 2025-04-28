@@ -26,8 +26,8 @@
 
 1. Клонувати репозиторій:
 ```bash
-git clone <your-repository-url>
-cd express-auth-project
+git clone https://github.com/guboss3214/express-2.git
+cd express-2
 ```
 
 2. Встановити залежності:
@@ -54,14 +54,9 @@ DB_URL=mongodb+srv://<db_username>:<db_password>@cluster0.mongodb.net/?retryWrit
 
 ## Запуск додатку
 
-Режим розробки:
+Запустити додаток:
 ```bash
 npm run dev
-```
-
-Продакшн режим:
-```bash
-npm start
 ```
 
 Додаток буде доступний на `http://localhost:3000`
@@ -86,30 +81,54 @@ npm start
 
 | Метод | Маршрут | Опис |
 |:-----|:-------|:-----|
-| `POST` | `/insertOne` | Додати одного користувача |
-| `POST` | `/insertMany` | Додати кількох користувачів |
-| `PATCH` | `/updateOne/:id` | Оновити дані одного користувача |
-| `PATCH` | `/updateMany` | Оновити декілька користувачів |
-| `PUT` | `/replaceOne/:id` | Замінити користувача повністю |
-| `DELETE` | `/deleteOne/:id` | Видалити одного користувача |
-| `DELETE` | `/deleteMany` | Видалити кількох користувачів |
-| `GET` | `/find` | Знайти користувачів за фільтрами |
+| `POST` | `/api/insertOne` | Додати одного користувача |
+| `POST` | `/api/insertMany` | Додати кількох користувачів |
+| `PATCH` | `/api/updateOne/:id` | Оновити дані одного користувача |
+| `PATCH` | `/api/updateMany` | Оновити декілька користувачів |
+| `PUT` | `/api/replaceOne/:id` | Замінити користувача повністю |
+| `DELETE` | `/api/deleteOne/:id` | Видалити одного користувача |
+| `DELETE` | `/api/deleteMany` | Видалити кількох користувачів |
+| `GET` | `/api/find` | Знайти користувачів за фільтрами |
 
 > **Примітка:**  
 > Для запитів `insertMany`, `updateMany`, `deleteMany`, `find` потрібно надсилати відповідні JSON-тіла (`filter`, `update`, `projection`).
 
-### Формат для `GET /find`
+### Формат для `GET /api/find`
 - Можна передавати `filter` та `projection` через query параметри у вигляді JSON:
 ```
-/find?filter={"age":{"$gt":18}}&projection={"name":1,"email":1}
+/api/find?filter={"age":{"$gt":18}}&projection={"name":1,"email":1}
 ```
+
+### Робота з базою даних через курсор та агрегацію (`/data`)
+
+| Метод | Маршрут | Опис |
+|:-----|:--------|:-----|
+| `GET` | `/data/cursor-users` | Отримати всіх користувачів із бази через MongoDB Cursor |
+| `GET` | `/data/aggregation-stats` | Отримати агреговану статистику користувачів (кількість користувачів, середній вік) |
+
+**Опис додаткових маршрутів:**
+
+- **`GET /data/cursor-users`**  
+  Виводить **усіх користувачів** із бази даних за допомогою курсора (`collection.find().forEach`).
+
+- **`GET /data/aggregation-stats`**  
+  Повертає **агреговану статистику**:
+  - `totalUsers` — загальна кількість користувачів
+  - `avgAge` — середній вік користувачів
+
+### Управління темами через куки (`/data`)
+
+| Метод | Маршрут | Опис |
+|:-----|:--------|:-----|
+| `POST` | `/data/theme` | Перемикання теми (запис у cookie) |
+| `GET` | `/data/dashboard` | Панель керування із захистом через JWT |
 
 ## Безпека
 
 - Використання httpOnly cookie для зберігання JWT
 - Захист маршрутів через middleware
-- Хешування паролів
-- Валідація запитів
+- Хешування паролів при реєстрації
+- Валідація запитів на сервері
 
 ## Використані технології
 
